@@ -1,7 +1,7 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv1D, MaxPooling1D, Flatten, Dense, Dropout
+from tensorflow.keras.layers import Conv1D, MaxPooling1D, Flatten, Dense, Dropout, LSTM
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 import pandas as pd
@@ -10,6 +10,26 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, concatenate
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import seaborn as sns
+
+# NOTE: This one failed pretty bad and it was not used in the final paper
+# NOTE: Probably bad architecture, maybe I'll get back to it
+def build_train_test_rnn_model(X_train, y_train, X_val, y_val, X_test, y_test, units=64, dropout_rate=0.5, epochs=10, batch_size=32):
+
+     model = Sequential()
+
+     model.add(LSTM(units=units, input_shape=(X_train.shape[1], 1)))
+     model.add(Dropout(dropout_rate))
+     model.add(Dense(1, activation='sigmoid'))
+
+     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+     model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_val, y_val), verbose=0)
+
+     _, val_accuracy = model.evaluate(X_val, y_val, verbose=0)
+
+     _, test_accuracy = model.evaluate(X_test, y_test, verbose=0)
+
+     return val_accuracy, test_accuracy
 
 def build_train_test_cnn_model(X_train, y_train, X_val, y_val, X_test, y_test, filters=32, kernel_size=3, pool_size=2,
                            dense_units=128, dropout_rate=0.5, epochs=10, batch_size=32, learning_rate=0.001,
